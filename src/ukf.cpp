@@ -61,10 +61,7 @@ UKF::UKF()
     lambda_ = 0;
     Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
     weights_ = VectorXd(2*n_aug_+1);
-
-    // Start time
     time_us_ = 0;
-
 }
 
 UKF::~UKF() {}
@@ -88,9 +85,6 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package)
             double vy = rhodot * sin(phi);
             double v = sqrt(vx * vx + vy * vy);
             x_ << x, y, v, rho, rhodot;
-
-            //state covariance matrix
-            //***** values can be tuned *****
             P_ << std_radr_*std_radr_, 0, 0, 0, 0,
                     0, std_radr_*std_radr_, 0, 0, 0,
                     0, 0, std_radrd_*std_radrd_, 0, 0,
@@ -101,22 +95,15 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package)
         {
             // Initialize state.
             x_ << meas_package.raw_measurements_(0), meas_package.raw_measurements_(1), 0, 0, 0.0;
-
-            //state covariance matrix
-            //***** values can be tuned *****
             P_ << std_laspx_*std_laspx_, 0, 0, 0, 0,
                     0, std_laspy_*std_laspy_, 0, 0, 0,
                     0, 0, 1, 0, 0,
                     0, 0, 0, 1, 0,
                     0, 0, 0, 0, 1;
         }
-
-        // done initializing, no need to predict or update
         is_initialized_ = true;
         time_us_ = meas_package.timestamp_;
     }
-
-    // Calculate delta_t, store current time for future
     double delta_t = (meas_package.timestamp_ - time_us_) / 1000000.0;
 
     time_us_ = meas_package.timestamp_;
